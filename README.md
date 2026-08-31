@@ -8,7 +8,7 @@
 本站点已部署到 **GitHub Pages**：
 
 ```
-https://nansao666.github.io/-AI/
+https://nansao666.github.io/NnNn/
 ```
 
 ## ✨ 演示说明
