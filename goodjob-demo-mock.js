@@ -91,7 +91,7 @@
     var uu = null;
     try { uu = new URL(url, location.origin); } catch (e) {}
     if (uu && (uu.pathname === "/product-config.json" || uu.pathname.indexOf("product-config.json") >= 0)) {
-      return Promise.resolve(jsonResponse({ productName: "GoodJob CRM", version: "1.5.17" }, 200));
+      return Promise.resolve(jsonResponse({ productName: "NnNn", version: "1.5.17" }, 200));
     }
     if (url.indexOf("/api/") >= 0 || url.indexOf("/whatsapp-plugin/api/") >= 0) {
       return Promise.resolve(handleApi(url, init || {}));
