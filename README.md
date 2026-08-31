@@ -8,10 +8,8 @@
 本站点已部署到 **GitHub Pages**：
 
 ```
-https://<你的用户名>.github.io/<仓库名>/
+https://nansao666.github.io/-AI/
 ```
-
-> 部署完成后请把上面的链接替换为实际地址。
 
 ## ✨ 演示说明
 
