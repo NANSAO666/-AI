@@ -87,6 +87,12 @@
 
   window.fetch = function (input, init) {
     var url = typeof input === "string" ? input : (input && input.url) || "";
+    // 站点根配置文件：GitHub Pages 子目录下绝对路径会 404，这里直接返回
+    var uu = null;
+    try { uu = new URL(url, location.origin); } catch (e) {}
+    if (uu && (uu.pathname === "/product-config.json" || uu.pathname.indexOf("product-config.json") >= 0)) {
+      return Promise.resolve(jsonResponse({ productName: "GoodJob CRM", version: "1.5.17" }, 200));
+    }
     if (url.indexOf("/api/") >= 0 || url.indexOf("/whatsapp-plugin/api/") >= 0) {
       return Promise.resolve(handleApi(url, init || {}));
     }
