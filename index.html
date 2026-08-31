@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NnNn 外贸客户管理原型</title>
+  <title>NnNn 国内外客户管理系统</title>
   <style>
     :root {
       --bg: #f2f6f5;
@@ -9031,6 +9031,9 @@
       cursor: pointer;
       transition: border-color .15s ease, background .15s ease, color .15s ease;
     }
+    .lead-entry-chip.lead-entry-chip-cn { background: var(--surface-2); color: var(--text); border-color: var(--line); }
+    .lead-entry-chip.lead-entry-chip-cn.active { background: #e8f0ea; border-color: #2f7d5a; color: #1f6b4a; }
+    .lead-entry-chip-cn-group { display: inline-flex; gap: 4px; }
     .lead-entry-chip:hover { border-color: rgba(15, 118, 110, .4); }
     .lead-entry-chip.active {
       border-color: rgba(22, 163, 106, .45);
@@ -23616,7 +23619,7 @@ body.platform-mode .workspace-tabs { display:none !important; }
     @media(max-width:1180px){.file-center-layout{grid-template-columns:190px minmax(390px,1fr)}.file-detail-panel{position:static;grid-column:1/-1}.file-detail-empty{min-height:130px}}
     @media(max-width:780px){.file-center-head{align-items:flex-start;flex-direction:column}.file-center-head .head-actions{width:100%}.file-center-head .btn{flex:1}.file-center-metrics{grid-template-columns:1fr 1fr}.file-center-metrics>div:nth-child(2){border-right:0}.file-center-metrics>div:nth-child(-n+2){border-bottom:1px solid var(--fc-line)}.file-center-toolbar{grid-template-columns:1fr 1fr}.file-center-toolbar input{grid-column:1/-1}.file-center-layout{grid-template-columns:1fr}.file-category-panel{overflow:auto}.file-category-list{display:flex}.file-category-list button{min-width:130px}.file-detail-panel{grid-column:auto}.file-table-head{display:none}.file-table-row{grid-template-columns:minmax(0,1fr) auto}.file-table-row>.file-table-cell:nth-child(2){grid-column:1}.file-table-row>.file-table-cell:nth-child(3){grid-area:1/2}.file-table-row>.file-table-cell:last-child{grid-column:2}.file-source-choice{grid-template-columns:1fr}}
   </style>
-  <script type="module" crossorigin src="./assets/index-DQBI3t9L.js"></script>
+  <script type="module" crossorigin src="./assets/index-C3hJfjzo.js"></script>
   <script src="goodjob-demo-mock.js"></script>
 </head>
 <body>
@@ -23680,7 +23683,7 @@ body.platform-mode .workspace-tabs { display:none !important; }
         <div class="brand-mark" aria-hidden="true"><span>N</span><span>n</span></div>
         <div>
           <strong>NnNn</strong>
-          <span>外贸客户增长中台</span>
+          <span>国内外客户增长中台</span>
         </div>
       </div>
 
@@ -24149,6 +24152,9 @@ body.platform-mode .workspace-tabs { display:none !important; }
                     <button type="button" class="lead-entry-chip active" data-lead-entry="madein">Made-in-China</button>
                     <button type="button" class="lead-entry-chip" data-lead-entry="globalsources">Global Sources</button>
                     <button type="button" class="lead-entry-chip active" data-lead-entry="europages">Europages</button>
+                    <button type="button" class="lead-entry-chip lead-entry-chip-cn" data-lead-entry="douyin">抖音</button>
+                    <button type="button" class="lead-entry-chip lead-entry-chip-cn" data-lead-entry="xiaohongshu">小红书</button>
+                    <button type="button" class="lead-entry-chip lead-entry-chip-cn" data-lead-entry="kuaishou">快手</button>
                   </div>
                 </div>
                 <div class="lead-field lead-url-field"><label>官网/平台结果链接</label><textarea id="leadFinderUrlInput" placeholder="每行一个链接，最多 12 条。留空时使用已启用数据源搜索。"></textarea></div>
