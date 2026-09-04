@@ -25,7 +25,112 @@
     return null;
   }
 
-  function resolveDynamic(method, pathname, query) {
+  
+  // ===== 个人试用版：localStorage 持久化数据层（可真实增删改并保存） =====
+  var TRIAL_KEY = "nnnn_trial_db_v3";
+  var TRIAL_COLS = DETAIL_RESOLVERS.filter(function (dr) { return dr.listKey; });
+  var TRIAL_COL_PATH = {};
+  TRIAL_COLS.forEach(function (dr) { TRIAL_COL_PATH[dr.listKey.replace(/^GET /, "")] = dr; });
+
+  function trialLoad() {
+    var raw = null;
+    try { raw = localStorage.getItem(TRIAL_KEY); } catch (e) {}
+    if (raw) {
+      try { return JSON.parse(raw); } catch (e) {}
+    }
+    var db = {};
+    TRIAL_COLS.forEach(function (dr) {
+      var arr = [];
+      var entries = FIXTURES[dr.listKey];
+      if (entries && entries.length) {
+        var b = entries[0].body;
+        if (Array.isArray(b)) arr = b;
+        else if (b && Array.isArray(b[dr.listField])) arr = b[dr.listField];
+      }
+      db[dr.listField] = arr;
+      if (dr.listField === "deals" && b && Array.isArray(b.events)) db.dealEvents = b.events;
+    });
+    trialSave(db);
+    return db;
+  }
+  function trialSave(db) {
+    try { localStorage.setItem(TRIAL_KEY, JSON.stringify(db)); } catch (e) {}
+  }
+  function trialWrap(dr, item) {
+    var w = {}; w[dr.wrap] = item; return w;
+  }
+  function trialList(method, dr, pathname, init) {
+    var db = trialLoad();
+    var list = db[dr.listField] || [];
+    var parsed = null;
+    if (init && init.body) { try { parsed = JSON.parse(init.body); } catch (e) {} }
+    if (method === "GET") {
+      var out = {}; out[dr.listField] = list;
+      if (dr.listField === "customers") { out.mineCount = list.length; out.publicCount = 0; }
+      if (dr.listField === "deals") { out.events = db.dealEvents || []; }
+      return jsonResponse(out, 200);
+    }
+    if (method === "POST") {
+      var item = parsed || {};
+      if (!item.id) item.id = "t" + Date.now().toString(36) + Math.floor(Math.random() * 9999);
+      if (!item.createdAt) item.createdAt = new Date().toISOString();
+      list.unshift(item);
+      db[dr.listField] = list;
+      trialSave(db);
+      return jsonResponse(trialWrap(dr, item), 200);
+    }
+    return null;
+  }
+  function trialDetail(method, dr, id, init) {
+    var db = trialLoad();
+    var list = db[dr.listField] || [];
+    var parsed = null;
+    if (init && init.body) { try { parsed = JSON.parse(init.body); } catch (e) {} }
+    var idx = -1;
+    for (var k = 0; k < list.length; k++) { if (list[k] && list[k].id === id) { idx = k; break; } }
+    if (method === "GET") {
+      if (idx >= 0) return jsonResponse(trialWrap(dr, list[idx]), 200);
+      return jsonResponse({ message: "未找到", ok: false }, 200);
+    }
+    if (method === "PUT" || method === "PATCH") {
+      if (idx < 0) return jsonResponse({ ok: false, message: "未找到" }, 404);
+      list[idx] = Object.assign({}, list[idx], parsed || {});
+      db[dr.listField] = list;
+      trialSave(db);
+      return jsonResponse(trialWrap(dr, list[idx]), 200);
+    }
+    if (method === "DELETE") {
+      if (idx >= 0) { list.splice(idx, 1); db[dr.listField] = list; trialSave(db); }
+      return jsonResponse({ ok: true }, 200);
+    }
+    if (method === "POST") {
+      // 动作类写操作：成功但不改数据
+      return jsonResponse({ ok: true }, 200);
+    }
+    return null;
+  }
+  function trialHandle(method, pathname, init) {
+    // 1) 精确列表路径 → 走 localStorage（覆盖 fixtures，以反映增删改）
+    if (TRIAL_COL_PATH[pathname]) {
+      return trialList(method, TRIAL_COL_PATH[pathname], pathname, init);
+    }
+    // 2) 详情路径（列表路径 + "/" + 单段 id，且无 fixtures 精确 key 覆盖）
+    var fullKey = method + " " + pathname;
+    if (!(FIXTURES[fullKey] && FIXTURES[fullKey].length)) {
+      for (var i = 0; i < TRIAL_COLS.length; i++) {
+        var lp = TRIAL_COLS[i].listKey.replace(/^GET /, "");
+        if (pathname.indexOf(lp + "/") === 0) {
+          var rest = pathname.slice(lp.length + 1);
+          if (rest && rest.indexOf("/") < 0) {
+            return trialDetail(method, TRIAL_COLS[i], decodeURIComponent(rest), init);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+function resolveDynamic(method, pathname, query) {
     // 详情类读取：从列表 fixture 中解析
     if (method === "GET") {
       for (var i = 0; i < DETAIL_RESOLVERS.length; i++) {
@@ -74,6 +179,8 @@
     var pathname = u.pathname;
     var query = u.search || "";
     var method = (init && init.method ? init.method : "GET").toUpperCase();
+        var trial = trialHandle(method, pathname, init);
+    if (trial) return trial;
     var key = method + " " + pathname;
     var entries = FIXTURES[key];
     if (entries && entries.length) {
@@ -106,7 +213,7 @@
       var b = document.createElement("div");
       b.id = "goodjob-demo-banner";
       b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:2147483647;background:#0b6e4f;color:#fff;font:12px/1.5 -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;padding:7px 16px;text-align:center;letter-spacing:.2px;display:flex;align-items:center;justify-content:center;gap:10px;";
-      b.innerHTML = '<span>GoodJob CRM · 静态演示版：页面与数据均为内置示例，仅供功能展示，不做真实数据保存。</span>' +
+      b.innerHTML = '<span>GoodJob CRM · 个人试用版：数据保存在本机浏览器，可自由增删改；清空浏览器数据即重置。</span>' +
         '<a href="#" id="goodjob-demo-banner-close" style="color:#fff;text-decoration:none;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.5);border-radius:4px;padding:1px 10px;">知道了</a>';
       document.body.appendChild(b);
       document.getElementById("goodjob-demo-banner-close").addEventListener("click", function (e) {
